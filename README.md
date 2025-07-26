@@ -152,6 +152,7 @@ sudo python src/main.py
 ## 🔄 Updates
 
 ### Version History
+- **v5.0**: Release to Github!
 - **v2.0**: Enhanced architecture and UI
 - **v1.5**: Added ImageLogger improvements
 - **v1.0**: Initial release
@@ -181,7 +182,7 @@ pip install -r requirements.txt
 ### Contact
 - **Author**: Sqrilizz
 - **Project**: QuantumKit Enhanced
-- **Version**: 2.0
+- **Version**: 5.0
 
 ---
 
