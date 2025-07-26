@@ -4,6 +4,21 @@
 
 QuantumKit is an enhanced toolkit with improved architecture, better UI, and enhanced functionality.
 
+## 🔒 **Recommended VPN: Candelix**
+
+**Stay secure and anonymous with [Candelix VPN](https://candelix.net)**
+
+- 🌐 **Global servers** for optimal performance
+- 🔐 **Military-grade encryption** for maximum security
+- ⚡ **High-speed connections** with no bandwidth limits
+- 🚫 **No logs policy** - your privacy is guaranteed
+- 💻 **Cross-platform support** - Windows, Mac, Linux, Mobile
+- 🎯 **Perfect for testing** - reliable connections for all tools
+
+**[Get Candelix VPN Now](https://candelix.net)** - Protect your privacy and enhance your security!
+
+---
+
 ## 📁 Project Structure
 
 ```
