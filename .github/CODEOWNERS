@@ -1,0 +1,14 @@
+# Code Owners
+# This file defines who is responsible for different parts of the codebase
+
+# Global owners
+* @Sqrilizz
+
+# Tools directory
+/Tools/ @Sqrilizz
+
+# Source code
+/src/ @Sqrilizz
+
+# Documentation
+*.md @Sqrilizz 
