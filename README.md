@@ -1,189 +1,209 @@
-# QuantumKit - Enhanced Toolkit
+# QuantumKit — Расширенный набор инструментов
 
-## 🚀 Overview
+## 🚀 Обзор
 
-QuantumKit is an enhanced toolkit with improved architecture, better UI, and enhanced functionality.
+**QuantumKit** — это расширенный набор инструментов с улучшенной архитектурой, обновлённым интерфейсом и расширенной функциональностью.
 
-## 🔒 **Recommended VPN: Candelix**
+## 🔒 **Рекомендуемый VPN: Candelix**
 
-**Stay secure and anonymous with [Candelix VPN](https://candelix.net)**
+**Оставайтесь в безопасности и анонимности с [Candelix VPN](https://candelix.net)**
 
-- 🌐 **Global servers** for optimal performance
-- 🔐 **Military-grade encryption** for maximum security
-- ⚡ **High-speed connections** with no bandwidth limits
-- 🚫 **No logs policy** - your privacy is guaranteed
-- 💻 **Cross-platform support** - Windows, Mac, Linux, Mobile
-- 🎯 **Perfect for testing** - reliable connections for all tools
+* 🌐 **Серверы по всему миру** для оптимальной производительности
+* 🔐 **Шифрование военного уровня** для максимальной безопасности
+* ⚡ **Высокая скорость** без ограничений трафика
+* 🚫 **Политика отсутствия логов** — ваша конфиденциальность под защитой
+* 💻 **Кроссплатформенная поддержка** — Windows, Mac, Linux, мобильные устройства
+* 🎯 **Идеально для тестирования** — надёжное соединение для всех инструментов
 
-**[Get Candelix VPN Now](https://candelix.net)** - Protect your privacy and enhance your security!
+**[Подключиться к Candelix VPN](https://candelix.net)** — защитите свою конфиденциальность и обеспечьте безопасность!
 
 ---
 
-## 📁 Project Structure
+## 📁 Структура проекта
 
 ```
 QuantumKit/
 ├── src/
 │   ├── config/
-│   │   └── settings.py          # Application settings
+│   │   └── settings.py          # Настройки приложения
 │   ├── utils/
-│   │   ├── logger.py            # Logging system
-│   │   ├── tool_manager.py      # Tool management
-│   │   ├── ui.py                # UI components
-│   │   └── image_logger_enhanced.py  # Enhanced ImageLogger
-│   └── main.py                  # Main application
-├── Tools/                       # Original tools
-├── generated_images/            # ImageLogger output
-├── logs/                        # Application logs
-├── SETUP.bat                    # Setup script
-├── START.bat                    # Launcher
-└── requirements.txt             # Dependencies
+│   │   ├── logger.py            # Система логирования
+│   │   ├── tool_manager.py      # Управление инструментами
+│   │   ├── ui.py                # Компоненты интерфейса
+│   │   └── image_logger_enhanced.py  # Улучшенный ImageLogger
+│   └── main.py                  # Основной файл приложения
+├── Tools/                       # Оригинальные инструменты
+├── generated_images/            # Вывод ImageLogger
+├── logs/                        # Логи приложения
+├── SETUP.bat                    # Скрипт установки
+├── START.bat                    # Запуск
+└── requirements.txt             # Зависимости
 ```
 
-## 🛠️ Installation
+## 🛠️ Установка
 
-### Quick Setup
+### Быстрая установка
+
 ```bash
-# Run the setup script
+# Запуск установочного скрипта
 SETUP.bat
 
-# Or manually install dependencies
+# Или ручная установка зависимостей
 pip install -r requirements.txt
 ```
 
-## 🎯 Usage
+## 🎯 Использование
 
-### Enhanced Version
+### Улучшенная версия
+
 ```bash
-# Start the enhanced version
+# Запуск улучшенной версии
 START.bat
 
-# Or run directly
+# Или напрямую
 python src/main.py
 ```
 
-### Original Version
+### Оригинальная версия
+
 ```bash
-# Run the original menu
+# Запуск оригинального меню
 python menu.py
 ```
 
-## 🔧 Features
+## 🔧 Возможности
 
-### Enhanced ImageLogger
-- **Multiple Hosting Options**: Local server, file system, custom URL, ngrok
-- **Improved UI**: Better user experience with clear instructions
-- **Automatic Setup**: Smart detection of ngrok and other tools
-- **Error Handling**: Comprehensive error messages and recovery
+### Улучшенный ImageLogger
 
-### Tool Management
-- **Centralized Control**: Manage all tools from one interface
-- **Status Monitoring**: Track running tools and their status
-- **Result Management**: View and export tool results
-- **System Information**: Display system details and compatibility
+* **Множество способов размещения**: локальный сервер, файловая система, собственный URL, ngrok
+* **Улучшенный интерфейс**: удобство и понятные инструкции
+* **Автоматическая настройка**: автоматическое определение ngrok и других инструментов
+* **Обработка ошибок**: подробные сообщения об ошибках и восстановление
 
-## 📊 Available Tools
+### Управление инструментами
 
-### Main Tools
-1. **WebhookSpam** - Discord webhook spam tool
-2. **Server Nuker** - Server management tool
-3. **ImageLogger** - Enhanced image logger with multiple hosting options
-4. **DDOS** - DDoS testing tool
-5. **Discord Spam** - Discord spam utilities
-6. **IP Pinger** - IP ping utility
-7. **Token Checker** - Discord token validator
-8. **Token Nuker** - Token management tool
+* **Централизованное управление**: все инструменты в одном месте
+* **Мониторинг статуса**: отображение состояния активных инструментов
+* **Управление результатами**: просмотр и экспорт результатов
+* **Информация о системе**: данные о системе и совместимости
 
-### Enhanced Features
-- **S. Show Tool Status** - View running tools
-- **R. Show Recent Results** - View recent tool executions
-- **E. Export Results** - Export results to file
-- **C. Clear Results** - Clear all stored results
-- **I. System Info** - Show system information
+## 📊 Доступные инструменты
 
-## 🔒 Security & Legal
+### Основные инструменты
 
-### Important Notice
-This toolkit is provided for **educational purposes only**. Users are responsible for:
+1. **WebhookSpam** — спам через Discord вебхуки
+2. **Server Nuker** — инструмент управления серверами
+3. **ImageLogger** — логгер изображений с расширенными возможностями
+4. **DDOS** — инструмент для тестирования на отказ в обслуживании
+5. **Discord Spam** — утилиты спама для Discord
+6. **IP Pinger** — утилита для пинга IP
+7. **Token Checker** — проверка Discord токенов
+8. **Token Nuker** — управление и удаление токенов
 
-- **Legal Compliance**: Ensure all activities comply with local laws
-- **Ethical Use**: Use tools responsibly and ethically
-- **Permission**: Only test systems you own or have explicit permission to test
-- **Data Protection**: Protect any collected data appropriately
+### Расширенные функции
 
-### Disclaimer
-The authors are not responsible for any misuse of these tools.
+* **S. Показать статус инструментов**
+* **R. Показать недавние результаты**
+* **E. Экспортировать результаты**
+* **C. Очистить результаты**
+* **I. Информация о системе**
 
-## 🐛 Troubleshooting
+## 🔒 Безопасность и законность
 
-### Common Issues
+### Важное уведомление
 
-#### Installation Problems
+Этот набор инструментов предоставлен **исключительно в образовательных целях**. Пользователи обязаны:
+
+* **Соблюдать законы**: выполнять только разрешённые действия
+* **Этичное использование**: применять инструменты ответственно
+* **Иметь разрешение**: тестировать только те системы, на которые есть явное разрешение
+* **Защищать данные**: все полученные данные должны быть защищены
+
+### Отказ от ответственности
+
+Авторы не несут ответственности за любое неправомерное использование.
+
+## 🐛 Устранение неполадок
+
+### Распространённые проблемы
+
+#### Проблемы с установкой
+
 ```bash
-# Check Python version (requires 3.7+)
+# Проверить версию Python (нужен 3.7+)
 python --version
 
-# Upgrade pip
+# Обновить pip
 python -m pip install --upgrade pip
 
-# Install dependencies manually
+# Установить зависимости вручную
 pip install colorama requests psutil
 ```
 
-#### Permission Errors
+#### Ошибки доступа
+
 ```bash
-# Run as administrator (Windows)
-# Or use sudo (Linux/Mac)
+# Запуск от имени администратора (Windows)
+# Или использовать sudo (Linux/Mac)
 sudo python src/main.py
 ```
 
-### Getting Help
-1. Check the logs in the `logs/` directory
-2. Run system compatibility check: `python src/utils/system_checker.py`
+### Получение помощи
 
-## 📈 Performance
+1. Посмотрите логи в папке `logs/`
+2. Запустите проверку совместимости: `python src/utils/system_checker.py`
 
-### System Requirements
-- **Python**: 3.7 or higher
-- **Memory**: 512MB RAM minimum
-- **Storage**: 100MB free space
-- **Network**: Internet connection for some features
+## 📈 Производительность
 
-## 🔄 Updates
+### Системные требования
 
-### Version History
-- **v5.0**: Release to Github!
-- **v2.0**: Enhanced architecture and UI
-- **v1.5**: Added ImageLogger improvements
-- **v1.0**: Initial release
+* **Python**: версии 3.7 или выше
+* **ОЗУ**: минимум 512MB
+* **Память**: не менее 100MB свободного пространства
+* **Интернет**: требуется для некоторых функций
 
-## 🤝 Contributing
+## 🔄 Обновления
 
-### Development Setup
+### История версий
+
+* **v5.0**: Публикация на GitHub
+* **v2.0**: Улучшенная архитектура и интерфейс
+* **v1.5**: Обновление ImageLogger
+* **v1.0**: Первый выпуск
+
+## 🤝 Вклад в проект
+
+### Настройка среды разработки
+
 ```bash
-# Clone the repository
+# Клонировать репозиторий
 git clone https://github.com/your-repo/QuantumKit.git
 
-# Install development dependencies
+# Установить зависимости для разработки
 pip install -r requirements.txt
 ```
 
-### Code Style
-- Follow PEP 8 guidelines
-- Add type hints where appropriate
-- Include docstrings for all functions
+### Стиль кода
 
-## 📞 Support
+* Следуйте стандартам PEP 8
+* Добавляйте аннотации типов
+* Используйте docstring’и для всех функций
 
-### Getting Help
-- **Documentation**: Check the README and guides
-- **Issues**: Report bugs on GitHub
+## 📞 Поддержка
 
-### Contact
-- **Author**: Sqrilizz
-- **Project**: QuantumKit Enhanced
-- **Version**: 5.0
+### Получение помощи
+
+* **Документация**: ознакомьтесь с README и руководствами
+* **Ошибки**: сообщайте о багах на GitHub
+
+### Контакты
+
+* **Автор**: Sqrilizz
+* **Проект**: QuantumKit Enhanced
+* **Версия**: 5.0
 
 ---
 
-**Remember**: Use responsibly and ethically! 🛡️ 
+**Помните**: Используйте ответственно и этично! 🛡️
+
+---
