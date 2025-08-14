@@ -9,7 +9,7 @@ init(autoreset=True)
 class PasswordGenerator:
     def __init__(self):
         self.length = 12
-        self.count = 10
+        self.count = 10000  # Увеличиваем до 10000 паролей для максимальной производительности
         self.include_uppercase = True
         self.include_lowercase = True
         self.include_numbers = True
@@ -55,13 +55,13 @@ class PasswordGenerator:
         # Количество паролей
         while True:
             try:
-                count_input = input(f"{Fore.YELLOW}[?] Enter number of passwords to generate (default 10): ").strip()
+                count_input = input(f"{Fore.YELLOW}[?] Enter number of passwords to generate (default 10000): ").strip()
                 if count_input:
                     self.count = int(count_input)
-                    if 1 <= self.count <= 1000:
-                        break
-                    else:
-                        print(f"{Fore.RED}[!] Count must be between 1 and 1000!")
+                                    if 1 <= self.count <= 100000:
+                    break
+                else:
+                    print(f"{Fore.RED}[!] Count must be between 1 and 100000!")
                 else:
                     break
             except ValueError:
@@ -129,7 +129,7 @@ class PasswordGenerator:
         return password
 
     def generate_passwords(self):
-        """Генерирует пароли"""
+        """Оптимизированная генерация паролей с batch processing"""
         print(f"\n{Fore.CYAN}[*] Generating {self.count} passwords...")
         print(f"{Fore.CYAN}[*] Length: {self.length}")
         print(f"{Fore.CYAN}[*] Settings: Uppercase={self.include_uppercase}, Lowercase={self.include_lowercase}, Numbers={self.include_numbers}, Symbols={self.include_symbols}")
@@ -139,20 +139,38 @@ class PasswordGenerator:
         passwords = []
         start_time = time.time()
         
-        for i in range(self.count):
-            password = self.generate_password()
-            passwords.append(password)
+        # Генерируем пароли батчами для лучшей производительности
+        batch_size = 1000
+        for i in range(0, self.count, batch_size):
+            batch_count = min(batch_size, self.count - i)
+            batch_passwords = []
             
-            # Выводим с цветовой индикацией
-            if len(password) == self.length:
-                print(f"{Fore.GREEN}[{i+1:3d}] {password}")
-            else:
-                print(f"{Fore.RED}[{i+1:3d}] {password}")
+            for j in range(batch_count):
+                password = self.generate_password()
+                batch_passwords.append(password)
+                
+                # Выводим только первые 100 паролей для экономии места
+                if i + j < 100:
+                    if len(password) == self.length:
+                        print(f"{Fore.GREEN}[{i+j+1:3d}] {password}")
+                    else:
+                        print(f"{Fore.RED}[{i+j+1:3d}] {password}")
+            
+            passwords.extend(batch_passwords)
+            
+            # Показываем прогресс для больших объемов
+            if self.count > 1000:
+                progress = (i + batch_count) / self.count * 100
+                print(f"\r{Fore.CYAN}[*] Generating passwords: {progress:.1f}% ({i + batch_count}/{self.count})", end='', flush=True)
+        
+        if self.count > 1000:
+            print()  # Новая строка после прогресса
         
         end_time = time.time()
         duration = end_time - start_time
         
         print(f"\n{Fore.CYAN}[*] Generation completed in {duration:.2f} seconds")
+        print(f"{Fore.CYAN}[*] Average speed: {self.count/duration:.1f} passwords/second")
         return passwords
 
     def analyze_password(self, password):

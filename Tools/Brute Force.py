@@ -20,7 +20,7 @@ class BruteForcer:
         self.password_file = "Tools/rockyou.txt"
         self.protocol = "http"
         self.port = None
-        self.threads = 10
+        self.threads = 500  # Увеличиваем до 500 потоков для максимальной скорости
         self.delay = 0.1
         self.success_count = 0
         self.failed_count = 0
@@ -110,13 +110,13 @@ class BruteForcer:
         # Количество потоков
         while True:
             try:
-                threads_input = input(f"{Fore.YELLOW}[?] Enter number of threads (default 10): ").strip()
+                threads_input = input(f"{Fore.YELLOW}[?] Enter number of threads (default 500): ").strip()
                 if threads_input:
                     self.threads = int(threads_input)
-                    if 1 <= self.threads <= 50:
-                        break
-                    else:
-                        print(f"{Fore.RED}[!] Threads must be between 1 and 50!")
+                                    if 1 <= self.threads <= 1000:
+                    break
+                else:
+                    print(f"{Fore.RED}[!] Threads must be between 1 and 1000!")
                 else:
                     break
             except ValueError:
@@ -314,24 +314,56 @@ class BruteForcer:
         start_time = time.time()
         
         try:
-            # Разделяем пароли между потоками
-            chunk_size = len(passwords) // self.threads
-            threads = []
+            # Используем ThreadPoolExecutor для лучшей производительности
+            from concurrent.futures import ThreadPoolExecutor, as_completed
             
-            for i in range(self.threads):
-                start_idx = i * chunk_size
-                end_idx = start_idx + chunk_size if i < self.threads - 1 else len(passwords)
-                thread_passwords = passwords[start_idx:end_idx]
+            with ThreadPoolExecutor(max_workers=self.threads) as executor:
+                # Разделяем пароли между потоками
+                chunk_size = len(passwords) // self.threads
+                futures = []
                 
-                thread = threading.Thread(target=self.brute_thread, args=(thread_passwords,))
-                thread.daemon = True
-                thread.start()
-                threads.append(thread)
-            
-            # Ждем завершения
-            for thread in threads:
-                thread.join()
+                for i in range(self.threads):
+                    start_idx = i * chunk_size
+                    end_idx = start_idx + chunk_size if i < self.threads - 1 else len(passwords)
+                    thread_passwords = passwords[start_idx:end_idx]
+                    
+                    future = executor.submit(self.brute_thread, thread_passwords)
+                    futures.append(future)
                 
+                # Мониторим прогресс
+                while self.is_bruting:
+                    try:
+                        elapsed = time.time() - start_time
+                        total_attempts = self.success_count + self.failed_count
+                        
+                        if elapsed > 0:
+                            rate = total_attempts / elapsed
+                            progress = (total_attempts / len(passwords)) * 100 if len(passwords) > 0 else 0
+                            
+                            print(f"\r{Fore.CYAN}[*] Progress: {total_attempts}/{len(passwords)} ({progress:.1f}%) | "
+                                  f"Valid: {len(self.found_credentials)} | "
+                                  f"Invalid: {self.failed_count} | "
+                                  f"Speed: {rate:.1f} attempts/sec | "
+                                  f"Time: {int(elapsed)}s", end='', flush=True)
+                        
+                        time.sleep(1)
+                        
+                        # Проверяем завершение
+                        if total_attempts >= len(passwords):
+                            break
+                            
+                    except KeyboardInterrupt:
+                        print(f"\n{Fore.YELLOW}[!] Stopping brute force...")
+                        self.is_bruting = False
+                        break
+                
+                # Ждем завершения всех задач
+                for future in as_completed(futures):
+                    try:
+                        future.result()
+                    except Exception as e:
+                        print(f"{Fore.RED}[!] Task error: {e}")
+                        
         except KeyboardInterrupt:
             print(f"\n{Fore.YELLOW}[!] Stopping brute force...")
             self.is_bruting = False

@@ -16,7 +16,7 @@ class AdvancedTokenChecker:
         self.checked_tokens = 0
         self.total_tokens = 0
         self.is_checking = False
-        self.threads = 10
+        self.threads = 200  # Увеличиваем до 200 потоков для максимальной скорости проверки
         self.delay = 0.1
 
     def print_banner(self):
@@ -66,9 +66,9 @@ class AdvancedTokenChecker:
             print(f"{Fore.RED}[!] No tokens loaded!")
             return False
 
-        print(f"{Fore.YELLOW}[*] Enter number of threads (default 10): ", end="")
+        print(f"{Fore.YELLOW}[*] Enter number of threads (default 200): ", end="")
         threads_input = input().strip()
-        self.threads = int(threads_input) if threads_input else 10
+        self.threads = int(threads_input) if threads_input else 200
 
         print(f"{Fore.YELLOW}[*] Enter delay between checks in seconds (default 0.1): ", end="")
         delay_input = input().strip()
@@ -178,13 +178,19 @@ class AdvancedTokenChecker:
             return False
 
     def check_thread(self):
-        """Token checking thread"""
+        """Оптимизированный token checking thread с rate limiting"""
         while self.is_checking and self.tokens:
             try:
                 token = self.tokens.pop(0)
                 self.check_token(token)
                 self.checked_tokens += 1
-                time.sleep(self.delay)
+                
+                # Интеллектуальная задержка для rate limiting
+                if self.checked_tokens % 50 == 0:  # Каждые 50 токенов
+                    time.sleep(0.1)  # Небольшая пауза
+                else:
+                    time.sleep(self.delay)
+                    
             except IndexError:
                 break
             except Exception as e:

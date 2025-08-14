@@ -32,9 +32,19 @@ class ToolManager:
         self.running_tools: Dict[str, subprocess.Popen] = {}
         self.tool_results: List[ToolResult] = []
         self._lock = threading.Lock()
+        self._available_tools_cache = None
+        self._cache_timestamp = 0
+        self._cache_duration = 60  # Cache for 60 seconds
     
     def get_available_tools(self) -> Dict[str, Dict[str, Any]]:
-        """Get list of available tools"""
+        """Get list of available tools with caching"""
+        current_time = time.time()
+        
+        # Return cached result if still valid
+        if (self._available_tools_cache is not None and 
+            current_time - self._cache_timestamp < self._cache_duration):
+            return self._available_tools_cache
+        
         available_tools = {}
         
         for tool_name, config in TOOL_CONFIGS.items():
@@ -51,6 +61,10 @@ class ToolManager:
                     "available": False,
                     "path": str(tool_path)
                 }
+        
+        # Update cache
+        self._available_tools_cache = available_tools
+        self._cache_timestamp = current_time
         
         return available_tools
     
@@ -69,7 +83,7 @@ class ToolManager:
         return tools_by_category
     
     def run_tool(self, tool_name: str, args: Optional[List[str]] = None) -> ToolResult:
-        """Run a specific tool"""
+        """Run a specific tool with optimized performance"""
         if args is None:
             args = []
         
@@ -98,21 +112,28 @@ class ToolManager:
         self.logger.info(f"Starting tool: {tool_name}")
         
         try:
-            # Run the tool
+            # Run the tool with optimized settings
             process = subprocess.Popen(
-                ["python", str(tool_path)] + args,
+                ["python", "-O", str(tool_path)] + args,  # -O flag for optimization
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                cwd=BASE_DIR
+                cwd=BASE_DIR,
+                env={**os.environ, 'PYTHONOPTIMIZE': '1'}  # Enable Python optimizations
             )
             
             # Store running process
             with self._lock:
                 self.running_tools[tool_name] = process
             
-            # Wait for completion
-            stdout, stderr = process.communicate()
+            # Wait for completion with timeout
+            try:
+                stdout, stderr = process.communicate(timeout=300)  # 5 minute timeout
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.communicate()
+                raise Exception("Tool execution timed out")
+            
             end_time = datetime.now()
             
             # Remove from running tools

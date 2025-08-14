@@ -102,6 +102,21 @@ class QuantumKitLogger:
         """Log failure message (custom level)"""
         colored_message = f"{Fore.RED}✗ {message}{Style.RESET_ALL}"
         self.logger.error(colored_message)
+    
+    def progress(self, message: str):
+        """Log progress message (custom level)"""
+        colored_message = f"{Fore.YELLOW}→ {message}{Style.RESET_ALL}"
+        self.logger.info(colored_message)
+    
+    def highlight(self, message: str):
+        """Log highlighted message (custom level)"""
+        colored_message = f"{Fore.CYAN}★ {message}{Style.RESET_ALL}"
+        self.logger.info(colored_message)
+    
+    def section(self, message: str):
+        """Log section header (custom level)"""
+        colored_message = f"{Fore.MAGENTA}━━━ {message} ━━━{Style.RESET_ALL}"
+        self.logger.info(colored_message)
 
 # Global logger instance
 logger = QuantumKitLogger()

@@ -1,278 +1,323 @@
-"""
-QuantumKit User Interface
-"""
 import os
-import sys
 import time
+import sys
+from typing import List, Optional, Callable
+from colorama import Fore, Style, Back, init
 import threading
-from typing import List, Dict, Optional, Callable
-from datetime import datetime
 
-from colorama import Fore, Style, init
-from src.config.settings import COLORS, APP_NAME, APP_VERSION, APP_AUTHOR
-from src.utils.logger import get_logger
-
-# Initialize colorama
+# Инициализация colorama
 init(autoreset=True)
 
+# Упрощенные цветовые константы
+COLOR_SUCCESS = Fore.GREEN
+COLOR_ERROR = Fore.RED
+COLOR_WARNING = Fore.YELLOW
+COLOR_INFO = Fore.CYAN
+COLOR_PRIMARY = Fore.MAGENTA
+COLOR_SECONDARY = Fore.BLUE
+COLOR_RESET = Style.RESET_ALL
+COLOR_HIGHLIGHT = Fore.WHITE + Style.BRIGHT
+
+# Минималистичные символы
+SYMBOLS = {
+    'check': '✓',
+    'cross': '✗',
+    'arrow': '→',
+    'star': '★',
+    'line': '─',
+    'corner_tl': '┌',
+    'corner_tr': '┐',
+    'corner_bl': '└',
+    'corner_br': '┘',
+    'line_v': '│',
+    'line_h': '─',
+    'cross_t': '├',
+    'cross_b': '┤'
+}
+
 class ProgressBar:
-    """Animated progress bar"""
+    """Упрощенная прогресс-бар"""
     
-    def __init__(self, total: int, description: str = "Progress", width: int = 50):
+    def __init__(self, total: int, width: int = 40, title: str = ""):
         self.total = total
-        self.current = 0
-        self.description = description
         self.width = width
-        self.start_time = time.time()
-        self.logger = get_logger("progress_bar")
+        self.title = title
+        self.current = 0
     
-    def update(self, value: int = None, increment: int = 1):
-        """Update progress bar"""
-        if value is not None:
-            self.current = value
-        else:
-            self.current += increment
-        
-        self.current = min(self.current, self.total)
-        self._display()
-    
-    def _display(self):
-        """Display the progress bar"""
+    def update(self, value: int):
+        """Обновить прогресс"""
+        self.current = value
         percentage = (self.current / self.total) * 100
-        filled_width = int((self.current / self.total) * self.width)
+        filled = int((self.current / self.total) * self.width)
         
-        bar = "█" * filled_width + "░" * (self.width - filled_width)
-        
-        elapsed_time = time.time() - self.start_time
-        if self.current > 0:
-            eta = (elapsed_time / self.current) * (self.total - self.current)
-            eta_str = f"ETA: {eta:.1f}s"
-        else:
-            eta_str = "ETA: --"
-        
-        sys.stdout.write(f"\r{Fore.CYAN}{self.description}: [{bar}] {percentage:.1f}% ({self.current}/{self.total}) {eta_str}")
-        sys.stdout.flush()
+        bar = f"{COLOR_PRIMARY}{'█' * filled}{Fore.WHITE}{'░' * (self.width - filled)}"
+        print(f"\r{self.title} {bar} {percentage:5.1f}%", end='', flush=True)
     
     def finish(self):
-        """Finish the progress bar"""
-        self.current = self.total
-        self._display()
-        print()  # New line after progress bar
-        elapsed_time = time.time() - self.start_time
-        self.logger.success(f"Completed in {elapsed_time:.2f} seconds")
+        """Завершить прогресс-бар"""
+        self.update(self.total)
+        print()
 
 class Spinner:
-    """Loading spinner"""
+    """Упрощенный спиннер"""
     
-    def __init__(self, message: str = "Loading"):
-        self.message = message
-        self.spinner_chars = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
-        self.current_char = 0
+    def __init__(self, text: str = "Loading..."):
+        self.text = text
+        self.spinner_chars = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
         self.running = False
         self.thread = None
     
     def start(self):
-        """Start the spinner"""
+        """Запустить спиннер"""
         self.running = True
-        self.thread = threading.Thread(target=self._spin, daemon=True)
+        self.thread = threading.Thread(target=self._spin)
+        self.thread.daemon = True
         self.thread.start()
     
     def stop(self):
-        """Stop the spinner"""
+        """Остановить спиннер"""
         self.running = False
         if self.thread:
             self.thread.join()
-        sys.stdout.write("\r" + " " * (len(self.message) + 10) + "\r")
-        sys.stdout.flush()
+        print("\r" + " " * (len(self.text) + 10) + "\r", end='', flush=True)
     
     def _spin(self):
-        """Spin animation"""
+        """Внутренний метод для анимации"""
+        i = 0
         while self.running:
-            char = self.spinner_chars[self.current_char]
-            sys.stdout.write(f"\r{Fore.CYAN}{char} {self.message}")
-            sys.stdout.flush()
+            char = self.spinner_chars[i % len(self.spinner_chars)]
+            print(f"\r{COLOR_PRIMARY}{char} {self.text}", end='', flush=True)
             time.sleep(0.1)
-            self.current_char = (self.current_char + 1) % len(self.spinner_chars)
+            i += 1
 
-class Menu:
-    """Interactive menu system"""
+class Notification:
+    """Упрощенные уведомления"""
     
-    def __init__(self, title: str = "Menu"):
-        self.title = title
-        self.options: List[Dict] = []
-        self.logger = get_logger("menu")
+    @staticmethod
+    def success(message: str):
+        """Успешное уведомление"""
+        print(f"{COLOR_SUCCESS}{SYMBOLS['check']} {message}")
     
-    def add_option(self, key: str, label: str, action: Callable, description: str = ""):
-        """Add menu option"""
-        self.options.append({
-            "key": key,
-            "label": label,
-            "action": action,
-            "description": description
-        })
+    @staticmethod
+    def error(message: str):
+        """Уведомление об ошибке"""
+        print(f"{COLOR_ERROR}{SYMBOLS['cross']} {message}")
     
-    def display(self):
-        """Display the menu"""
-        while True:
-            self._clear_screen()
-            self._print_banner()
-            self._print_title()
-            self._print_options()
-            
-            try:
-                choice = input(f"\n{Fore.MAGENTA}Enter your choice: ").strip().upper()
-                
-                if choice == "0" or choice == "EXIT":
-                    self.logger.info("Exiting menu")
-                    break
-                
-                # Find and execute the selected option
-                for option in self.options:
-                    if option["key"].upper() == choice:
-                        try:
-                            option["action"]()
-                        except KeyboardInterrupt:
-                            self.logger.info("Operation cancelled by user")
-                        except Exception as e:
-                            self.logger.error(f"Error executing option: {str(e)}")
-                        break
-                else:
-                    self.logger.warning(f"Invalid choice: {choice}")
-                    time.sleep(1)
-                    
-            except KeyboardInterrupt:
-                self.logger.info("Exiting menu")
-                break
-            except EOFError:
-                self.logger.info("Exiting menu")
-                break
+    @staticmethod
+    def warning(message: str):
+        """Предупреждение"""
+        print(f"{COLOR_WARNING}⚠ {message}")
     
-    def _clear_screen(self):
-        """Clear the screen"""
-        os.system('cls' if os.name == 'nt' else 'clear')
-    
-    def _print_banner(self):
-        """Print QuantumKit banner"""
-        banner = [
-            "   █████   █    ██  ▄▄▄       ███▄    █ ▄▄▄█████▓ █    ██  ███▄ ▄███▓",
-            " ▒██▓  ██▒ ██  ▓██▒▒████▄     ██ ▀█   █ ▓  ██▒ ▓▒ ██  ▓██▒▓██▒▀█▀ ██▒",
-            " ▒██▒  ██░▓██  ▒██░▒██  ▀█▄  ▓██  ▀█ ██▒▒ ▓██░ ▒░▓██  ▒██░▓██    ▓██░",
-            " ░██  █▀ ░▓▓█  ░██░░██▄▄▄▄██ ▓██▒  ▐▌██▒░ ▓██▓ ░ ▓▓█  ░██░▒██    ▒██ ",
-            " ░▒███▒█▄ ▒▒█████▓  ▓█   ▓██▒▒██░   ▓██░  ▒██▒ ░ ▒▒█████▓ ▒██▒   ░██▒",
-            " ░░ ▒▒░ ▒ ░▒▓▒ ▒ ▒  ▒▒   ▓▒█░░ ▒░   ▒ ▒   ▒ ░░   ░▒▓▒ ▒ ▒ ░ ▒░   ░  ░",
-            "  ░ ▒░  ░ ░░▒░ ░ ░   ▒   ▒▒ ░░ ░░   ░ ▒░    ░    ░░▒░ ░ ░ ░  ░      ░",
-            "    ░   ░  ░░░ ░ ░   ░   ▒      ░   ░ ░   ░       ░░░ ░ ░ ░      ░   ",
-            "     ░       ░           ░  ░         ░             ░            ░   ",
-            "",
-            f"                                by {APP_AUTHOR}"
-        ]
-        
-        for line in banner:
-            print(f"{Fore.MAGENTA}{line}")
-    
-    def _print_title(self):
-        """Print menu title"""
-        print(f"\n{Fore.CYAN}╔══════════════════════════════════════════════════════════════════════════════╗")
-        print(f"{Fore.CYAN}║{Fore.WHITE} {self.title:^76} {Fore.CYAN}║")
-        print(f"{Fore.CYAN}╚══════════════════════════════════════════════════════════════════════════════╝\n")
-    
-    def _print_options(self):
-        """Print menu options"""
-        for i, option in enumerate(self.options, 1):
-            key = option["key"]
-            label = option["label"]
-            description = option["description"]
-            
-            if description:
-                print(f"{Fore.MAGENTA}{key}. {Fore.WHITE}{label} - {Fore.YELLOW}{description}")
-            else:
-                print(f"{Fore.MAGENTA}{key}. {Fore.WHITE}{label}")
-        
-        print(f"\n{Fore.MAGENTA}0. {Fore.WHITE}Exit")
+    @staticmethod
+    def info(message: str):
+        """Информационное уведомление"""
+        print(f"{COLOR_INFO}ℹ {message}")
 
-class Table:
-    """Display data in table format"""
+def print_banner():
+    """Красивый баннер QuantumKit с оригинальным артом"""
+    os.system('cls' if os.name == 'nt' else 'clear')
     
-    def __init__(self, headers: List[str]):
-        self.headers = headers
-        self.rows: List[List[str]] = []
-    
-    def add_row(self, row: List[str]):
-        """Add a row to the table"""
-        self.rows.append(row)
-    
-    def display(self):
-        """Display the table"""
-        if not self.rows:
-            return
-        
-        # Calculate column widths
-        col_widths = []
-        for i, header in enumerate(self.headers):
-            max_width = len(header)
-            for row in self.rows:
-                if i < len(row):
-                    max_width = max(max_width, len(str(row[i])))
-            col_widths.append(max_width)
-        
-        # Print header
-        header_line = "│"
-        separator_line = "├"
-        for i, header in enumerate(self.headers):
-            header_line += f" {header:<{col_widths[i]}} │"
-            separator_line += "─" * (col_widths[i] + 2) + "┼"
-        separator_line = separator_line[:-1] + "┤"
-        
-        print(f"{Fore.CYAN}┌{separator_line[1:-1].replace('┼', '┬')}┐")
-        print(f"{Fore.CYAN}│{Fore.WHITE}{header_line[1:]}")
-        print(f"{Fore.CYAN}{separator_line}")
-        
-        # Print rows
-        for row in self.rows:
-            row_line = "│"
-            for i, cell in enumerate(row):
-                if i < len(col_widths):
-                    row_line += f" {str(cell):<{col_widths[i]}} │"
-            print(f"{Fore.CYAN}│{Fore.WHITE}{row_line[1:]}")
-        
-        print(f"{Fore.CYAN}└{separator_line[1:-1].replace('┼', '┴')}┘")
+    banner = f"""
+{COLOR_PRIMARY}   █████   █    ██  ▄▄▄       ███▄    █ ▄▄▄█████▓ █    ██  ███▄ ▄███▓
+{COLOR_PRIMARY} ▒██▓  ██▒ ██  ▓██▒▒████▄     ██ ▀█   █ ▓  ██▒ ▓▒ ██  ▓██▒▓██▒▀█▀ ██▒
+{COLOR_PRIMARY} ▒██▒  ██░▓██  ▒██░▒██  ▀█▄  ▓██  ▀█ ██▒▒ ▓██░ ▒░▓██  ▒██░▓██    ▓██░
+{COLOR_PRIMARY} ░██  █▀ ░▓▓█  ░██░░██▄▄▄▄██ ▓██▒  ▐▌██▒░ ▓██▓ ░ ▓▓█  ░██░▒██    ▒██ 
+{COLOR_PRIMARY} ░▒███▒█▄ ▒▒█████▓  ▓█   ▓██▒▒██░   ▓██░  ▒██▒ ░ ▒▒█████▓ ▒██▒   ░██▒
+{COLOR_PRIMARY} ░░ ▒▒░ ▒ ░▒▓▒ ▒ ▒  ▒▒   ▓▒█░░ ▒░   ▒ ▒   ▒ ░░   ░▒▓▒ ▒ ▒ ░ ▒░   ░  ░
+{COLOR_PRIMARY}  ░ ▒░  ░ ░░▒░ ░ ░   ▒   ▒▒ ░░ ░░   ░ ▒░    ░    ░░▒░ ░ ░ ░  ░      ░
+{COLOR_PRIMARY}    ░   ░  ░░░ ░ ░   ░   ▒      ░   ░ ░   ░       ░░░ ░ ░ ░      ░   
+{COLOR_PRIMARY}     ░       ░           ░  ░         ░             ░            ░   
+{Fore.WHITE}                                {COLOR_WARNING}by Sqrilizz{COLOR_RESET}
 
-def print_status(message: str, status: str = "info"):
-    """Print status message with color"""
-    colors = {
-        "info": Fore.CYAN,
-        "success": Fore.GREEN,
-        "warning": Fore.YELLOW,
-        "error": Fore.RED
-    }
-    
-    icons = {
-        "info": "ℹ",
-        "success": "✓",
-        "warning": "⚠",
-        "error": "✗"
-    }
-    
-    color = colors.get(status, Fore.WHITE)
-    icon = icons.get(status, "•")
-    
-    print(f"{color}{icon} {message}{Style.RESET_ALL}")
+{COLOR_PRIMARY}                    QUANTUMKIT v6.2 - ADVANCED SECURITY TOOLKIT{COLOR_RESET}
+"""
+    print(banner)
 
-def print_header(title: str, subtitle: str = ""):
-    """Print section header"""
-    print(f"\n{Fore.CYAN}╔══════════════════════════════════════════════════════════════════════════════╗")
-    print(f"{Fore.CYAN}║{Fore.WHITE} {title:^76} {Fore.CYAN}║")
-    if subtitle:
-        print(f"{Fore.CYAN}║{Fore.YELLOW} {subtitle:^76} {Fore.CYAN}║")
-    print(f"{Fore.CYAN}╚══════════════════════════════════════════════════════════════════════════════╝\n")
+def print_header(title: str):
+    """Упрощенный заголовок"""
+    width = 50
+    print(f"\n{COLOR_PRIMARY}{SYMBOLS['line_h'] * width}")
+    print(f"{COLOR_PRIMARY}{title.center(width)}")
+    print(f"{COLOR_PRIMARY}{SYMBOLS['line_h'] * width}\n")
 
-def confirm_action(message: str = "Are you sure?") -> bool:
-    """Ask for user confirmation"""
+def print_separator():
+    """Простой разделитель"""
+    print(f"{COLOR_PRIMARY}{SYMBOLS['line_h'] * 50}")
+
+def print_success(message: str):
+    """Успешное сообщение"""
+    print(f"{COLOR_SUCCESS}{SYMBOLS['check']} {message}")
+
+def print_error(message: str):
+    """Сообщение об ошибке"""
+    print(f"{COLOR_ERROR}{SYMBOLS['cross']} {message}")
+
+def print_warning(message: str):
+    """Предупреждение"""
+    print(f"{COLOR_WARNING}⚠ {message}")
+
+def print_info(message: str):
+    """Информационное сообщение"""
+    print(f"{COLOR_INFO}ℹ {message}")
+
+def confirm_action(message: str) -> bool:
+    """Подтверждение действия"""
     while True:
-        response = input(f"{Fore.YELLOW}{message} (y/N): ").strip().lower()
+        response = input(f"{COLOR_WARNING}{message} (y/N): ").strip().lower()
         if response in ['y', 'yes']:
             return True
         elif response in ['n', 'no', '']:
             return False
         else:
-            print(f"{Fore.RED}Please enter 'y' or 'n'") 
+            print(f"{COLOR_ERROR}Please enter 'y' or 'n'")
+
+class Menu:
+    """Меню с пагинацией по категориям"""
+    
+    def __init__(self, title: str):
+        self.title = title
+        self.options = []
+        self.current_page = 1
+        self.items_per_page = 8  # Количество элементов на странице
+    
+    def add_option(self, key: str, label: str, action: Callable, description: str = "", category: str = ""):
+        """Добавить опцию в меню"""
+        self.options.append({
+            'key': key,
+            'label': label,
+            'action': action,
+            'description': description,
+            'category': category
+        })
+    
+    def display(self):
+        """Отобразить меню с пагинацией"""
+        while True:
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print_banner()
+            print_header(self.title)
+            
+            # Разбить опции на страницы
+            start_idx = (self.current_page - 1) * self.items_per_page
+            end_idx = start_idx + self.items_per_page
+            page_options = self.options[start_idx:end_idx]
+            
+            # Отобразить опции текущей страницы
+            for option in page_options:
+                key = option['key']
+                label = option['label']
+                desc = option.get('description', '')
+                category = option.get('category', '')
+                
+                # Добавить иконку категории
+                category_icon = self._get_category_icon(category)
+                display_label = f"{category_icon} {label}" if category_icon else label
+                
+                print(f"{COLOR_PRIMARY}{key:>2}. {Fore.WHITE}{display_label}")
+                if desc:
+                    print(f"{Style.DIM}    {desc}")
+                print()
+            
+            # Навигация между страницами
+            total_pages = (len(self.options) + self.items_per_page - 1) // self.items_per_page
+            
+            if total_pages > 1:
+                nav_text = f"{COLOR_WARNING}Страница {self.current_page}/{total_pages}"
+                if self.current_page > 1:
+                    nav_text += f" {COLOR_PRIMARY}[P] Предыдущая"
+                if self.current_page < total_pages:
+                    nav_text += f" {COLOR_PRIMARY}[N] Следующая"
+                print(f"{nav_text}\n")
+            
+            print(f"{COLOR_PRIMARY}0. {COLOR_ERROR}Выход")
+            print_separator()
+            
+            choice = input(f"{COLOR_SUCCESS}>>> ").strip().upper()
+            
+            if choice == "0":
+                break
+            elif choice == "P" and self.current_page > 1:
+                self.current_page -= 1
+            elif choice == "N" and self.current_page < total_pages:
+                self.current_page += 1
+            else:
+                # Найти и выполнить действие
+                for option in page_options:
+                    if option['key'].upper() == choice:
+                        try:
+                            option['action']()
+                            input(f"\n{COLOR_WARNING}Нажмите Enter для продолжения...")
+                        except Exception as e:
+                            print_error(f"Ошибка выполнения {option['label']}: {str(e)}")
+                            input(f"\n{COLOR_WARNING}Нажмите Enter для продолжения...")
+                        break
+    
+    def _get_category_icon(self, category: str) -> str:
+        """Получить иконку для категории"""
+        icons = {
+            "discord": "🔥",
+            "network": "🌐", 
+            "security": "🔐",
+            "utility": "⚙️",
+            "reporting": "📊",
+            "system": "💻"
+        }
+        return icons.get(category.lower(), "")
+
+def create_table(headers: List[str], rows: List[List[str]], title: str = "") -> str:
+    """Упрощенная таблица"""
+    if not rows:
+        return ""
+    
+    # Определить ширину колонок
+    col_widths = []
+    for i in range(len(headers)):
+        max_width = len(headers[i])
+        for row in rows:
+            if i < len(row):
+                max_width = max(max_width, len(row[i]))
+        col_widths.append(max_width + 2)
+    
+    # Создать таблицу
+    table = ""
+    if title:
+        table += f"{COLOR_PRIMARY}{title}\n"
+    
+    # Заголовок
+    table += f"{COLOR_PRIMARY}{SYMBOLS['corner_tl']}"
+    for i, header in enumerate(headers):
+        table += f"{SYMBOLS['line_h'] * col_widths[i]}{SYMBOLS['cross_t'] if i < len(headers) - 1 else SYMBOLS['corner_tr']}"
+    table += "\n"
+    
+    table += f"{COLOR_PRIMARY}{SYMBOLS['line_v']}"
+    for i, header in enumerate(headers):
+        table += f"{Fore.WHITE}{header.center(col_widths[i])}{COLOR_PRIMARY}{SYMBOLS['line_v']}"
+    table += "\n"
+    
+    # Разделитель
+    table += f"{COLOR_PRIMARY}{SYMBOLS['cross_t']}"
+    for i in range(len(headers)):
+        table += f"{SYMBOLS['line_h'] * col_widths[i]}{SYMBOLS['cross_t'] if i < len(headers) - 1 else SYMBOLS['cross_b']}"
+    table += "\n"
+    
+    # Строки данных
+    for row in rows:
+        table += f"{COLOR_PRIMARY}{SYMBOLS['line_v']}"
+        for i, cell in enumerate(row):
+            if i < len(col_widths):
+                table += f"{Fore.WHITE}{cell.center(col_widths[i])}{COLOR_PRIMARY}{SYMBOLS['line_v']}"
+        table += "\n"
+    
+    # Нижняя граница
+    table += f"{COLOR_PRIMARY}{SYMBOLS['corner_bl']}"
+    for i in range(len(headers)):
+        table += f"{SYMBOLS['line_h'] * col_widths[i]}{SYMBOLS['cross_b'] if i < len(headers) - 1 else SYMBOLS['corner_br']}"
+    
+    return table
+
+def animate_loading(text: str, duration: float = 2.0):
+    """Анимация загрузки"""
+    spinner = Spinner(text)
+    spinner.start()
+    time.sleep(duration)
+    spinner.stop()

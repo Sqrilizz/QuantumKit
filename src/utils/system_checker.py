@@ -191,6 +191,94 @@ class SystemChecker:
             self.warnings.append("psutil not available, cannot check system resources")
             return {}
     
+    def check_antivirus_interference(self) -> bool:
+        """Check for potential antivirus interference"""
+        try:
+            import psutil
+            
+            # Check for common antivirus processes
+            antivirus_processes = [
+                'avast', 'avg', 'mcafee', 'norton', 'kaspersky', 
+                'bitdefender', 'malwarebytes', 'windows defender'
+            ]
+            
+            running_processes = [p.name().lower() for p in psutil.process_iter(['name'])]
+            
+            detected_av = []
+            for av in antivirus_processes:
+                if any(av in proc for proc in running_processes):
+                    detected_av.append(av)
+            
+            if detected_av:
+                self.warnings.append(f"Antivirus detected: {', '.join(detected_av)}")
+                self.recommendations.append("Consider adding QuantumKit to antivirus exclusions")
+                return False
+            
+            self.logger.info("No antivirus interference detected")
+            return True
+            
+        except Exception as e:
+            self.warnings.append(f"Cannot check antivirus: {e}")
+            return True
+    
+    def check_firewall_settings(self) -> bool:
+        """Check firewall settings"""
+        try:
+            import subprocess
+            
+            # Check Windows Firewall status
+            result = subprocess.run(
+                ['netsh', 'advfirewall', 'show', 'allprofiles', 'state'], 
+                capture_output=True, text=True
+            )
+            
+            if result.returncode == 0:
+                if 'ON' in result.stdout:
+                    self.warnings.append("Windows Firewall is enabled")
+                    self.recommendations.append("Consider adding QuantumKit to firewall exceptions")
+                else:
+                    self.logger.info("Windows Firewall is disabled")
+            else:
+                self.warnings.append("Cannot check firewall status")
+            
+            return True
+            
+        except Exception as e:
+            self.warnings.append(f"Cannot check firewall: {e}")
+            return True
+    
+    def check_python_packages(self) -> Dict[str, str]:
+        """Check installed Python packages and versions"""
+        try:
+            import pkg_resources
+            
+            required_packages = [
+                'colorama', 'requests', 'psutil', 'cryptography',
+                'pillow', 'qrcode', 'pyperclip', 'beautifulsoup4',
+                'selenium', 'aiohttp'
+            ]
+            
+            installed_packages = {}
+            missing_packages = []
+            
+            for package in required_packages:
+                try:
+                    version = pkg_resources.get_distribution(package).version
+                    installed_packages[package] = version
+                    self.logger.info(f"✓ {package}: v{version}")
+                except pkg_resources.DistributionNotFound:
+                    missing_packages.append(package)
+                    self.issues.append(f"Missing package: {package}")
+            
+            if missing_packages:
+                self.recommendations.append(f"Install missing packages: pip install {' '.join(missing_packages)}")
+            
+            return installed_packages
+            
+        except Exception as e:
+            self.warnings.append(f"Cannot check Python packages: {e}")
+            return {}
+    
     def run_full_check(self) -> Dict[str, any]:
         """Run complete system check"""
         self.logger.info("Starting system compatibility check...")
@@ -205,6 +293,9 @@ class SystemChecker:
             'permissions': self.check_permissions(),
             'network': self.check_network_connectivity(),
             'resources': self.check_system_resources(),
+            'antivirus': self.check_antivirus_interference(),
+            'firewall': self.check_firewall_settings(),
+            'python_packages': self.check_python_packages(),
             'issues': self.issues,
             'warnings': self.warnings,
             'recommendations': self.recommendations

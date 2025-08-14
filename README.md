@@ -1,173 +1,178 @@
-# QuantumKit - Enhanced Toolkit
+# QuantumKit v6.2
 
-## 🚀 Overview
+**Advanced Security Toolkit** - A collection of security and network tools for professionals and researchers.
 
-QuantumKit is an enhanced toolkit with improved architecture, better UI, and enhanced functionality.
-
-## 📁 Project Structure
-
-```
-QuantumKit/
-├── src/
-│   ├── config/
-│   │   └── settings.py          # Application settings
-│   ├── utils/
-│   │   ├── logger.py            # Logging system
-│   │   ├── tool_manager.py      # Tool management
-│   │   ├── ui.py                # UI components
-│   │   └── image_logger_enhanced.py  # Enhanced ImageLogger
-│   └── main.py                  # Main application
-├── Tools/                       # Original tools
-├── generated_images/            # ImageLogger output
-├── logs/                        # Application logs
-├── SETUP.bat                    # Setup script
-├── START.bat                    # Launcher
-└── requirements.txt             # Dependencies
-```
-
-## 🛠️ Installation
-
-### Quick Setup
-```bash
-# Run the setup script
-SETUP.bat
-
-# Or manually install dependencies
-pip install -r requirements.txt
-```
-
-## 🎯 Usage
-
-### Enhanced Version
-```bash
-# Start the enhanced version
-START.bat
-
-# Or run directly
-python src/main.py
-```
-
-### Original Version
-```bash
-# Run the original menu
-python menu.py
-```
-
-## 🔧 Features
-
-### Enhanced ImageLogger
-- **Multiple Hosting Options**: Local server, file system, custom URL, ngrok
-- **Improved UI**: Better user experience with clear instructions
-- **Automatic Setup**: Smart detection of ngrok and other tools
-- **Error Handling**: Comprehensive error messages and recovery
-
-### Tool Management
-- **Centralized Control**: Manage all tools from one interface
-- **Status Monitoring**: Track running tools and their status
-- **Result Management**: View and export tool results
-- **System Information**: Display system details and compatibility
-
-## 📊 Available Tools
-
-### Main Tools
-1. **WebhookSpam** - Discord webhook spam tool
-2. **Server Nuker** - Server management tool
-3. **ImageLogger** - Enhanced image logger with multiple hosting options
-4. **DDOS** - DDoS testing tool
-5. **Discord Spam** - Discord spam utilities
-6. **IP Pinger** - IP ping utility
-7. **Token Checker** - Discord token validator
-8. **Token Nuker** - Token management tool
-
-### Enhanced Features
-- **S. Show Tool Status** - View running tools
-- **R. Show Recent Results** - View recent tool executions
-- **E. Export Results** - Export results to file
-- **C. Clear Results** - Clear all stored results
-- **I. System Info** - Show system information
-
-## 🔒 Security & Legal
-
-### Important Notice
-This toolkit is provided for **educational purposes only**. Users are responsible for:
-
-- **Legal Compliance**: Ensure all activities comply with local laws
-- **Ethical Use**: Use tools responsibly and ethically
-- **Permission**: Only test systems you own or have explicit permission to test
-- **Data Protection**: Protect any collected data appropriately
-
-### Disclaimer
-The authors are not responsible for any misuse of these tools.
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-#### Installation Problems
-```bash
-# Check Python version (requires 3.7+)
-python --version
-
-# Upgrade pip
-python -m pip install --upgrade pip
-
-# Install dependencies manually
-pip install colorama requests psutil
-```
-
-#### Permission Errors
-```bash
-# Run as administrator (Windows)
-# Or use sudo (Linux/Mac)
-sudo python src/main.py
-```
-
-### Getting Help
-1. Check the logs in the `logs/` directory
-2. Run system compatibility check: `python src/utils/system_checker.py`
-
-## 📈 Performance
-
-### System Requirements
-- **Python**: 3.7 or higher
-- **Memory**: 512MB RAM minimum
-- **Storage**: 100MB free space
-- **Network**: Internet connection for some features
-
-## 🔄 Updates
-
-### Version History
-- **v2.0**: Enhanced architecture and UI
-- **v1.5**: Added ImageLogger improvements
-- **v1.0**: Initial release
-
-## 🤝 Contributing
-
-### Development Setup
-```bash
-# Clone the repository
-git clone https://github.com/your-repo/QuantumKit.git
-
-# Install development dependencies
-pip install -r requirements.txt
-```
-
-### Code Style
-- Follow PEP 8 guidelines
-- Add type hints where appropriate
-- Include docstrings for all functions
-
-## 📞 Support
-
-### Getting Help
-- **Documentation**: Check the README and guides
-- **Issues**: Report bugs on GitHub
-
-### Contact
-- **Author**: Sqrilizz
-- **Project**: QuantumKit Enhanced
-- **Version**: 2.0
+*by Sqrilizz*
 
 ---
 
-**Remember**: Use responsibly and ethically! 🛡️ 
+## What is QuantumKit?
+
+QuantumKit is a comprehensive toolkit that combines multiple security tools into one easy-to-use interface. It's designed for security researchers, penetration testers, and network administrators who need reliable tools for their work.
+
+## Tools Included
+
+### Discord Tools
+- **Universal Discord Spammer** - Message automation tool
+- **Universal Nuker** - Server management utility  
+- **Universal Image Logger** - Image tracking system
+- **Token Checker** - Discord token validation
+
+### Network & Security
+- **Universal Network Tool** - Network analysis and monitoring
+- **BotNet** - Bot network management
+- **Brute Force** - Password cracking utility
+- **Encryption Tool** - File and text encryption
+- **Link Bridge Generator** - Secure link creation
+
+### Utilities
+- **Password Generator** - Create secure passwords
+- **Web Scraper** - Extract data from websites
+- **Telegram Report** - System reporting via Telegram
+
+## Installation
+
+### Requirements
+- Python 3.7 or higher
+- Windows/Linux/macOS
+
+### Setup
+```bash
+# Download the project
+git clone https://github.com/sqrilizz/QuantumKit.git
+cd QuantumKit
+
+# Install required packages
+pip install -r requirements.txt
+
+# Run the main menu
+python menu.py
+```
+
+## Usage
+
+1. **Start the toolkit:**
+   ```bash
+   python menu.py
+   ```
+
+2. **Navigate the menu:**
+   - Use number keys to select tools
+   - Press Enter to confirm
+   - Use P/N for page navigation
+
+3. **Tool categories:**
+   - Discord tools (1-4)
+   - Network tools (5-6) 
+   - Security tools (7-9)
+   - Utilities (10-11)
+   - Reporting (12)
+
+## Features
+
+### Clean Interface
+- Simple terminal-based UI
+- Color-coded menus and status messages
+- Progress bars for long operations
+- Easy navigation between tools
+
+### Design System
+- **Color Scheme**: Magenta (primary), Blue (secondary), Green (success), Red (error), Yellow (warning), Cyan (info)
+- **Icons**: Clear status indicators (✓ ✗ ⚠ ℹ)
+- **Animations**: Simple spinners and progress bars
+- **Layout**: Consistent borders and readable formatting
+
+### Performance
+- Fast startup and loading
+- Optimized for resource usage
+- Cross-platform compatibility
+- Minimal dependencies
+
+### Security
+- All tools include safety checks
+- Error handling and validation
+- Configurable settings
+- Logging for audit trails
+
+## Configuration
+
+### Telegram Report Setup
+1. Create a bot with @BotFather
+2. Get your bot token
+3. Get your chat ID from @userinfobot
+4. Configure in the tool settings
+
+### Proxy Configuration
+- Edit `Tools/proxies.txt` to add your proxies
+- One proxy per line
+- Format: `ip:port` or `ip:port:username:password`
+
+## File Structure
+
+```
+QuantumKit/
+├── menu.py              # Main menu interface
+├── src/                 # Core UI components
+│   └── utils/
+│       ├── ui.py        # UI functions
+│       └── logo.py      # Logos and banners
+├── Tools/               # All security tools
+│   ├── Telegram Report.py
+│   ├── Universal Discord Spammer.py
+│   └── ... (other tools)
+├── requirements.txt     # Python dependencies
+└── README.md           # This file
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Import errors:**
+```bash
+pip install -r requirements.txt
+```
+
+**Permission errors:**
+- Run as administrator (Windows)
+- Use sudo (Linux/macOS)
+
+**Tool not working:**
+- Check Python version (3.7+)
+- Verify all dependencies installed
+- Check tool-specific requirements
+
+### Getting Help
+
+1. Check the tool's built-in help
+2. Review error messages carefully
+3. Ensure all requirements are met
+4. Check file permissions
+
+## Updates
+
+### Version 6.2 Changes
+- Simplified UI design
+- Improved performance
+- Added pagination to menu
+- Updated tool categories
+- Better error handling
+
+### Previous Versions
+- See CHANGELOG.md for full history
+
+## Legal Notice
+
+This toolkit is for educational and authorized security testing purposes only. Users are responsible for complying with all applicable laws and regulations. The authors are not liable for any misuse of these tools.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+---
+
+**Remember:** Always use these tools responsibly and only on systems you own or have explicit permission to test. 
