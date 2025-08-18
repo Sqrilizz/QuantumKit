@@ -101,12 +101,6 @@ python menu.py
 2. Get your bot token
 3. Get your chat ID from @userinfobot
 4. Configure in the tool settings
-
-### Proxy Configuration
-- Edit `Tools/proxies.txt` to add your proxies
-- One proxy per line
-- Format: `ip:port` or `ip:port:username:password`
-
 ## File Structure
 
 ```
