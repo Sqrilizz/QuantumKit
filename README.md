@@ -15,8 +15,6 @@ QuantumKit is a comprehensive toolkit that combines multiple security tools into
 ### Discord Tools
 - **Universal Discord Spammer** - Message automation tool
 - **Universal Nuker** - Server management utility  
-- **Universal Image Logger** - Image tracking system
-- **Token Checker** - Discord token validation
 
 ### Network & Security
 - **Universal Network Tool** - Network analysis and monitoring
@@ -157,7 +155,7 @@ pip install -r requirements.txt
 
 ## Legal Notice
 
-This toolkit is for educational and authorized security testing purposes only. Users are responsible for complying with all applicable laws and regulations. The authors are not liable for any misuse of these tools.
+This toolkit is for educational and authorized security testing purposes only. Users are responsible for complying with all applicable laws and regulations. The authors are not liable for any misuse of these tools.)
 
 ## Contributing
 
