@@ -33,7 +33,7 @@ QuantumKit is a comprehensive toolkit that combines multiple security tools into
 ## Installation
 
 ### Requirements
-- Python 3.7 or higher
+- Python 3.12 or higher
 - Windows/Linux/macOS
 
 ### Setup
